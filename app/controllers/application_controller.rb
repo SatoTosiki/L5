@@ -4,4 +4,18 @@ class ApplicationController < ActionController::Base
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
+
+  helper_method :current_user
+
+  private
+
+  def current_user
+    @current_user ||= User.find_by(uid: session[:login_uid]) if session[:login_uid].present?
+  end
+
+  def require_login
+    return if current_user
+
+    redirect_to root_path, alert: "この操作にはログインが必要です。"
+  end
 end

@@ -1,0 +1,69 @@
+<main class="container">
+  <header class="page-header">
+    <h1>つぶやきアプリ</h1>
+    <% if current_user %>
+      <p><%= current_user.uid %> でログイン中</p>
+      <%= link_to "ログアウト", top_logout_path %>
+    <% else %>
+      <%= link_to "ユーザー登録", new_user_path %>
+    <% end %>
+  </header>
+
+  <% flash.each do |type, message| %>
+    <p class="flash <%= type %>"><%= message %></p>
+  <% end %>
+
+  <% unless current_user %>
+    <section class="card">
+      <h2>ログイン</h2>
+      <%= form_with url: top_login_path do |form| %>
+        <div>
+          <%= form.label :uid, "ユーザーID" %>
+          <%= form.text_field :uid, required: true, autocomplete: "username" %>
+        </div>
+        <div>
+          <%= form.label :password, "パスワード" %>
+          <%= form.password_field :password, required: true, autocomplete: "current-password" %>
+        </div>
+        <%= form.submit "ログイン" %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if current_user %>
+    <section class="card">
+      <h2>ツイートする</h2>
+      <%= form_with model: @tweet do |form| %>
+        <%= form.label :message, "メッセージ" %>
+        <%= form.text_area :message, rows: 3, maxlength: 280, required: true %>
+        <%= form.submit "投稿" %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <section>
+    <h2>みんなのツイート</h2>
+    <% if @tweets.any? %>
+      <ul class="tweet-list">
+        <% @tweets.each do |tweet| %>
+          <li class="card">
+            <p class="tweet-message"><%= tweet.message %></p>
+            <p class="tweet-meta">
+              <%= tweet.user.uid %> · <%= l(tweet.created_at, format: :short) %>
+            </p>
+            <% if current_user %>
+              <% like = @likes_by_tweet_id[tweet.id] %>
+              <% if like %>
+                <%= link_to "いいね削除", like_path(like), data: { turbo_method: :delete } %>
+              <% else %>
+                <%= link_to "いいね", likes_path(tweet_id: tweet.id), data: { turbo_method: :post } %>
+              <% end %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>まだツイートはありません。</p>
+    <% end %>
+  </section>
+</main>

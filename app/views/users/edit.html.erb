@@ -1,0 +1,30 @@
+<main class="container narrow">
+  <h1>プロフィール編集</h1>
+
+  <% flash.each do |type, message| %>
+    <p class="flash <%= type %>"><%= message %></p>
+  <% end %>
+
+  <% if @user.errors.any? %>
+    <div class="flash alert">
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <section class="card">
+    <p>ユーザーID: <%= @user.uid %></p>
+    <%= form_with model: @user, url: profile_path do |form| %>
+      <div>
+        <%= form.label :age, "年齢" %>
+        <%= form.number_field :age, min: 0, step: 1 %>
+      </div>
+      <%= form.submit "保存" %>
+    <% end %>
+  </section>
+
+  <%= link_to "プロフィールへ戻る", profile_path %>
+</main>

@@ -50,6 +50,42 @@ class TweetAppTest < ActionDispatch::IntegrationTest
     assert_equal user, posted_tweet.user
   end
 
+  test "views and updates the logged-in user's profile" do
+    user = User.create!(uid: "profile-user", password: "secret123")
+    post top_login_path, params: { uid: user.uid, password: "secret123" }
+
+    get profile_path
+    assert_response :success
+    assert_select "dd", text: user.uid
+    assert_select "dd", text: "未設定"
+
+    patch profile_path, params: { user: { age: 25, uid: "changed-id" } }
+    assert_redirected_to profile_path
+    assert_equal 25, user.reload.age
+    assert_equal "profile-user", user.uid
+  end
+
+  test "requires login to view or update a profile" do
+    get profile_path
+    assert_redirected_to root_path
+
+    get edit_profile_path
+    assert_redirected_to root_path
+
+    patch profile_path, params: { user: { age: 25 } }
+    assert_redirected_to root_path
+  end
+
+  test "rejects a negative profile age" do
+    user = User.create!(uid: "profile-user", password: "secret123")
+    post top_login_path, params: { uid: user.uid, password: "secret123" }
+
+    patch profile_path, params: { user: { age: -1 } }
+
+    assert_response :unprocessable_entity
+    assert_nil user.reload.age
+  end
+
   test "does not allow duplicate user ids" do
     assert_no_difference("User.count") do
       post users_path, params: {

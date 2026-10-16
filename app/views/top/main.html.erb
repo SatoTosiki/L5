@@ -3,6 +3,7 @@
     <h1>つぶやきアプリ</h1>
     <% if current_user %>
       <p><%= current_user.uid %> でログイン中</p>
+      <%= link_to "プロフィール", profile_path %>
       <%= link_to "ログアウト", top_logout_path %>
     <% else %>
       <%= link_to "ユーザー登録", new_user_path %>

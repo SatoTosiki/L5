@@ -1,0 +1,21 @@
+<main class="container narrow">
+  <header class="page-header">
+    <h1>プロフィール</h1>
+    <%= link_to "編集", edit_profile_path %>
+  </header>
+
+  <% flash.each do |type, message| %>
+    <p class="flash <%= type %>"><%= message %></p>
+  <% end %>
+
+  <section class="card">
+    <dl>
+      <dt>ユーザーID</dt>
+      <dd><%= @user.uid %></dd>
+      <dt>年齢</dt>
+      <dd><%= @user.age.presence || "未設定" %></dd>
+    </dl>
+  </section>
+
+  <%= link_to "ツイート一覧へ戻る", root_path %>
+</main>

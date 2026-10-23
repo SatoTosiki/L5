@@ -16,7 +16,7 @@ Rails.application.routes.draw do
   get "top/logout", to: "top#logout", as: :top_logout
 
   resources :users, only: %i[new create]
-  resource :profile, controller: :users, only: %i[show edit update]
-  resources :tweets, only: :create
+  resource :profile, controller: :users, only: %i[show edit update destroy]
+  resources :tweets, only: %i[create destroy]
   resources :likes, only: %i[create destroy]
 end

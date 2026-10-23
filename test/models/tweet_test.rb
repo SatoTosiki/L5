@@ -11,4 +11,14 @@ class TweetTest < ActiveSupport::TestCase
 
     assert_not duplicate_like.valid?
   end
+
+  test "destroys likes when the tweet is destroyed" do
+    like = Like.create!(user: users(:two), tweet: tweets(:one))
+
+    assert_difference("Like.count", -1) do
+      tweets(:one).destroy!
+    end
+
+    assert_not Like.exists?(like.id)
+  end
 end

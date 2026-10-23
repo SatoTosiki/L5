@@ -1,7 +1,7 @@
 class Tweet < ApplicationRecord
   belongs_to :user
   has_many :likes, dependent: :destroy
-  has_many :liking_users, through: :likes, source: :user
+  has_many :like_users, through: :likes, source: :user
 
   validates :message, presence: true, length: { maximum: 280 }
 end

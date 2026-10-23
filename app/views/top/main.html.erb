@@ -59,6 +59,10 @@
               <% else %>
                 <%= link_to "いいね", likes_path(tweet_id: tweet.id), data: { turbo_method: :post } %>
               <% end %>
+              <% if tweet.user_id == current_user.id %>
+                <%= button_to "ツイート削除", tweet_path(tweet), method: :delete,
+                  form: { data: { turbo_confirm: "このツイートを削除しますか？" } } %>
+              <% end %>
             <% end %>
           </li>
         <% end %>

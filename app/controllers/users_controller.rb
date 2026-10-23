@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :require_login, only: %i[show edit update]
+  before_action :require_login, only: %i[show edit update destroy]
 
   def new
     @user = User.new
@@ -31,6 +31,12 @@ class UsersController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    current_user.destroy!
+    reset_session
+    redirect_to root_path, notice: "アカウントを削除しました。"
   end
 
   private

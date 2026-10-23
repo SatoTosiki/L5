@@ -17,5 +17,8 @@
     </dl>
   </section>
 
+  <%= button_to "アカウント削除", profile_path, method: :delete,
+    form: { data: { turbo_confirm: "アカウントと投稿を削除します。この操作は取り消せません。" } } %>
+
   <%= link_to "ツイート一覧へ戻る", root_path %>
 </main>

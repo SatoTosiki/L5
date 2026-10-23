@@ -16,6 +16,21 @@ class TweetAppTest < ActionDispatch::IntegrationTest
     assert_not_equal "secret123", User.find_by!(uid: "new-user").password_digest
   end
 
+  test "does not register a user when password confirmation differs" do
+    assert_no_difference("User.count") do
+      post users_path, params: {
+        user: {
+          uid: "mismatched-password-user",
+          password: "secret123",
+          password_confirmation: "different123"
+        }
+      }
+    end
+
+    assert_response :unprocessable_entity
+    assert_select "li", text: /confirmation/i
+  end
+
   test "logs in, posts a tweet, and can like and unlike it" do
     user = User.create!(uid: "writer", password: "secret123")
     tweet = tweets(:one)
@@ -63,6 +78,45 @@ class TweetAppTest < ActionDispatch::IntegrationTest
     assert_redirected_to profile_path
     assert_equal 25, user.reload.age
     assert_equal "profile-user", user.uid
+  end
+
+  test "deletes the logged-in user's tweet and its likes" do
+    user = User.create!(uid: "tweet-deleter", password: "secret123")
+    like = users(:two).like(user.tweets.create!(message: "削除対象の投稿"))
+    tweet = like.tweet
+    post top_login_path, params: { uid: user.uid, password: "secret123" }
+
+    assert_difference("Tweet.count", -1) do
+      assert_difference("Like.count", -1) do
+        delete tweet_path(tweet)
+      end
+    end
+
+    assert_redirected_to root_path
+    assert_not Tweet.exists?(tweet.id)
+    assert_not Like.exists?(like.id)
+  end
+
+  test "deletes the logged-in user, their tweets, and related likes" do
+    user = User.create!(uid: "account-deleter", password: "secret123")
+    tweet = user.tweets.create!(message: "削除される投稿")
+    owned_like = user.like(tweets(:two))
+    other_like = users(:two).like(tweet)
+    post top_login_path, params: { uid: user.uid, password: "secret123" }
+
+    assert_difference("User.count", -1) do
+      assert_difference("Tweet.count", -1) do
+        assert_difference("Like.count", -2) do
+          delete profile_path
+        end
+      end
+    end
+
+    assert_redirected_to root_path
+    assert_not User.exists?(user.id)
+    assert_not Tweet.exists?(tweet.id)
+    assert_not Like.exists?(owned_like.id)
+    assert_not Like.exists?(other_like.id)
   end
 
   test "requires login to view or update a profile" do
